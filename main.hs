@@ -44,3 +44,11 @@ normPoly p = [sumAll m | m <- groupMonomes p]
 addPoly :: Polynome -> Polynome -> Polynome
 addPoly p1 p2 = normPoly (p1 ++ p2)
 
+derivePoly :: Char -> Polynome -> Polynome
+derivePoly dim p = []
+
+multPoly :: Polynome -> Polynome -> Polynome
+multPoly p1 p2 = []
+
+
+
