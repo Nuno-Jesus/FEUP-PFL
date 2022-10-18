@@ -38,6 +38,9 @@ groupMonomes p = groupBy sameLiteral (sortOn snd (sortLiterals(cleanZeros p)))
 sumAll :: Polynome -> Monome
 sumAll lst = (sum (map fst lst), snd (head lst))
 
-normalize :: Polynome -> Polynome
-normalize p = [sumAll m | m <- groupMonomes p]
+normPoly :: Polynome -> Polynome
+normPoly p = [sumAll m | m <- groupMonomes p]
+
+addPoly :: Polynome -> Polynome -> Polynome
+addPoly p1 p2 = normPoly (p1 ++ p2)
 
