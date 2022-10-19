@@ -52,7 +52,13 @@ derivePoly :: Char -> Polynome -> Polynome
 derivePoly dim p = cleanZeros (map (deriveMonome dim) (normPoly p))
 
 multPoly :: Polynome -> Polynome -> Polynome
-multPoly p1 p2 = []
+multPoly p1 p2 = [multMono a b | a <- normPoly p1, b <- normPoly p2]
 
+multMono :: Monome -> Monome -> Monome
+multMono m1 m2 = (fst m1 * fst m2, multLiterals $ groupBy sameVar $ sort $ snd m1 ++ snd m2)
 
+multLiterals :: [[Literal]] -> [Literal]
+multLiterals lst = [(fst (head x), sum $ snd $ unzip x) | x <- lst]
 
+sameVar :: Literal -> Literal -> Bool
+sameVar a b = fst a == fst b
