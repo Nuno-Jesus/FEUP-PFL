@@ -56,7 +56,7 @@ derivePoly :: Char -> Polynome -> Polynome
 derivePoly dim p = cleanZeros (map (deriveMonome dim) (normPoly p))
 
 multPoly :: Polynome -> Polynome -> Polynome
-multPoly p1 p2 = [multMono a b | a <- normPoly p1, b <- normPoly p2]
+multPoly p1 p2 = normPoly [multMono a b | a <- normPoly p1, b <- normPoly p2]
 
 multMono :: Monome -> Monome -> Monome
 multMono m1 m2 = (fst m1 * fst m2, multLiterals $ groupBy sameVar $ sort $ snd m1 ++ snd m2)
@@ -118,3 +118,15 @@ notSignal c = c /= '+' && c /= '-'
 stringToInt :: String -> Int
 stringToInt [] = 0
 stringToInt str = digitToInt (head str) * 10 ^ (length str - 1) + stringToInt (tail str)
+
+normPoly' :: String -> Polynome
+normPoly' p1 = normPoly $ strToPoly p1
+
+addPoly' :: String -> String -> Polynome
+addPoly' p1 p2 = addPoly  (strToPoly p1) (strToPoly p2)
+
+multPoly' :: String -> String -> Polynome
+multPoly' p1 p2 = multPoly  (strToPoly p1) (strToPoly p2)
+
+derivePoly' :: String -> Char -> Polynome
+derivePoly' p1 ch = derivePoly ch (strToPoly p1)
