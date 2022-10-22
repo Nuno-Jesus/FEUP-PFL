@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use :" #-}
+{-# HLINT ignore "Use second" #-}
 import Data.List
 import Data.Maybe
 import Data.Char
@@ -37,10 +38,10 @@ sameLiteral :: Monome -> Monome -> Bool
 sameLiteral m1 m2 = snd m1 == snd m2
 
 groupMonomes :: Polynome -> [Polynome]
-groupMonomes p = groupBy sameLiteral (sortOn snd (sortLiterals (cleanZeros p)))
+groupMonomes p = groupBy sameLiteral $ sortOn snd $ sortLiterals $ cleanZeros p
 
-sumAll :: Polynome -> Monome
-sumAll lst = (sum (map fst lst), snd (head lst))
+sumAll :: [Monome] -> Monome
+sumAll lst = (sum $ map fst lst, snd $ head lst)
 
 normPoly :: Polynome -> Polynome
 normPoly p = [sumAll m | m <- groupMonomes p]
@@ -53,7 +54,7 @@ deriveMonome dim m = (fst m * fromMaybe 0 (lookup dim (snd m)),
   map (\l -> if fst l == dim then (fst l, snd l - 1) else l) (snd m))
 
 derivePoly :: Char -> Polynome -> Polynome
-derivePoly dim p = cleanZeros (map (deriveMonome dim) (normPoly p))
+derivePoly dim p = cleanZeros $ map (deriveMonome dim) (normPoly p)
 
 multPoly :: Polynome -> Polynome -> Polynome
 multPoly p1 p2 = normPoly [multMono a b | a <- normPoly p1, b <- normPoly p2]
@@ -119,6 +120,8 @@ stringToInt :: String -> Int
 stringToInt [] = 0
 stringToInt str = digitToInt (head str) * 10 ^ (length str - 1) + stringToInt (tail str)
 
+---------------------------------------------- ! OTHERS ----------------------------------------------
+
 normPoly' :: String -> Polynome
 normPoly' p1 = normPoly $ strToPoly p1
 
@@ -130,3 +133,13 @@ multPoly' p1 p2 = multPoly  (strToPoly p1) (strToPoly p2)
 
 derivePoly' :: String -> Char -> Polynome
 derivePoly' p1 ch = derivePoly ch (strToPoly p1)
+
+
+-- NEEDTO:
+{-
+	- Clean Literals where the exponent is 0
+	- Create the test file
+	- Convert polynomials to strings
+	- Refactor the code if there is time to do it
+	- Make the README.md and convert to pdf
+-} 
