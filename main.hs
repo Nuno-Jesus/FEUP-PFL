@@ -1,5 +1,9 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use :" #-}
 import Data.List
 import Data.Maybe
+import Data.Char
 
 type Literal = (Char, Int)
 type Monome = (Int, [Literal])
@@ -62,3 +66,45 @@ multLiterals lst = [(fst (head x), sum $ snd $ unzip x) | x <- lst]
 
 sameVar :: Literal -> Literal -> Bool
 sameVar a b = fst a == fst b
+
+---------------------------------------------- ! PARSING ----------------------------------------------
+
+-- Recieves something like x2y3, xy, x4y, y
+strToLiteral :: String -> [Literal]
+strToLiteral [] = []
+strToLiteral [x] = [(x, 1)]
+strToLiteral (x:xs) 
+	| isDigit $ head xs = [(x, stringToInt (takeWhile isDigit xs))] 
+		++ strToLiteral (dropWhile isDigit xs)
+	| isLetter $ head xs = [(x, 1)] 
+		++ strToLiteral xs
+
+-- Receives something like -4x2y3, -1x2, 1xy3
+strToMono :: String -> Monome
+strToMono (x:xs)
+	| x == '-' = (-1 * stringToInt (takeWhile isDigit xs), strToLiteral $ dropWhile isDigit xs)
+	| x == '+' = (stringToInt (takeWhile isDigit xs), strToLiteral $ dropWhile isDigit xs)
+	| isDigit x = (stringToInt (takeWhile isDigit (x:xs)), strToLiteral $ dropWhile isDigit (x:xs))
+
+-- Recieves the whole string filtered of ' ' and '^'
+strToPoly' :: String -> Polynome
+strToPoly' [] = []
+strToPoly' str
+	| isSignal $ head str = [strToMono (head str : takeWhile notSignal (tail str))] 
+		++ strToPoly (dropWhile notSignal (tail str))
+	| otherwise = [strToMono (takeWhile notSignal str)] 
+		++ strToPoly (dropWhile notSignal str)
+
+-- Recieves the raw string to filter first
+strToPoly :: String -> Polynome
+strToPoly str = strToPoly' $ filter (\c -> c /= '^' && c/= ' ') str
+
+isSignal :: Char -> Bool
+isSignal c = c == '+' || c == '-'
+
+notSignal :: Char -> Bool
+notSignal c = c /= '+' && c /= '-'
+
+stringToInt :: String -> Int
+stringToInt [] = 0
+stringToInt str = digitToInt (head str) * 10 ^ (length str - 1) + stringToInt (tail str)
