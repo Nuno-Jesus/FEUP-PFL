@@ -22,7 +22,7 @@ type Polynome = [Monome]
 	4x^2y^3 + 3y^3x^2
 	[(4, [('x', 2), ('y', 3)]), (3, [('y', 3), ('x', 2)])]
 
-    4*x^2y^3 + 3*x + 1*y^3x^2 + y + 0*z 
+    4x^2y^3 + 3x + y^3x^2 + y + 0z 
     [(4,[('x',2), ('y', 3)]), (3,[('x',1)]), (1, [('y', 3), ('x',2)]), (1,[('y',1)]), (0,[('z',1)])] 
 
  -}
@@ -85,6 +85,7 @@ strToMono (x:xs)
 	| x == '-' = (-1 * stringToInt (takeWhile isDigit xs), strToLiteral $ dropWhile isDigit xs)
 	| x == '+' = (stringToInt (takeWhile isDigit xs), strToLiteral $ dropWhile isDigit xs)
 	| isDigit x = (stringToInt (takeWhile isDigit (x:xs)), strToLiteral $ dropWhile isDigit (x:xs))
+	| otherwise = (1, strToLiteral (x:xs))
 
 -- Recieves the whole string filtered of ' ' and '^'
 strToPoly' :: String -> Polynome
@@ -97,7 +98,16 @@ strToPoly' str
 
 -- Recieves the raw string to filter first
 strToPoly :: String -> Polynome
-strToPoly str = strToPoly' $ filter (\c -> c /= '^' && c/= ' ') str
+strToPoly str = strToPoly' $ normalizeStr (filter (\c -> c /= '^' && c/= ' ') str) False
+
+normalizeStr :: String -> Bool -> String
+normalizeStr [] _ = []
+normalizeStr (x:xs) hasCoeff 
+	| isDigit x = x : normalizeStr xs True
+	| isSignal x = x : normalizeStr xs False
+	| otherwise = if not hasCoeff 
+		then ['1'] ++ [x] ++ normalizeStr xs True
+		else [x] ++ normalizeStr xs True 
 
 isSignal :: Char -> Bool
 isSignal c = c == '+' || c == '-'
