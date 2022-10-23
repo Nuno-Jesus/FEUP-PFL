@@ -83,3 +83,57 @@ A list of monomials () defines a polynomial.
 ## Testing
 We made auxiliary functions to aid us testing our program, each function tests a specific functionaliy. In Main.hs there is a do block which uses these auxiliary functions to test some examples.
 
+For further tests, please read the following instructions to execute each test properly.
+
+- **Testing String to Polynomial Conversion**
+	1. String containing the polynomial input
+	2. Polynome containing the expected output
+
+	```haskell
+	strToPolyTest "3x" [(3, [('x', 1)])]
+	```
+
+- **Testing Polynomial Normalization**
+	1. Polynome containing the input
+	2. Polynome containing the expected output
+
+	```haskell
+	normPolyTest [(1, [('x', 1)]), (4, [('x', 1)])] [(5, [('x', 1)])]
+	```
+
+- **Testing Polynomial Addition**
+	1. Polynome 1 containing the first input
+	2. Polynome 2 containing the second input
+	3. Polynome containing the expected output
+
+	```haskell
+	addPolyTest [(10,[('x', 1)])] [(-15,[('x', 1)])] [(-5, [('x', 1)])]
+	```
+
+- **Testing Polynomial Derivation**
+	1. Polynome containing the polynomial input
+	2. Polynome containing the expected output
+	3. Char containing the variable to derive on
+
+	```haskell
+	derivePolyTest [(7, [('x', 3), ('y', 1)])] [(21, [('x', 2), ('y', 1)])] 'x'
+	```
+
+- **Testing Polynomial Multiplication**
+	1. Polynome 1 containing the first input
+	2. Polynome 2 containing the second input
+	3. Polynome containing the expected output
+
+	```haskell
+	multPolyTest [(1, [('x',2)])] [(5, [('x',4)])] [(5, [('x',6)])]
+	```
+
+- **Testing Polynomial to String Conversion**
+	1. Polynome containing the input
+	2. String containing the expected output
+
+	```haskell
+	polyToStrTest [(-10, [('x', 10)]), (2, [('x', 1), ('y', 8)])] "-10x^10 + 2xy^8"
+	```
+
+
