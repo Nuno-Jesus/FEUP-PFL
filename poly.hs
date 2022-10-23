@@ -2,6 +2,9 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use :" #-}
 {-# HLINT ignore "Use second" #-}
+
+module Polynome where
+
 import Data.List
 import Data.Maybe
 import Data.Char
@@ -32,7 +35,8 @@ sortLiterals :: Polynome -> Polynome
 sortLiterals p = [(fst x, sort (snd x)) | x <- p]
 
 cleanZeros :: Polynome -> Polynome
-cleanZeros = filter (\m -> fst m /= 0)
+cleanZeros [(0, _)] = [(0,[])]
+cleanZeros p = filter (\m -> fst m /= 0)  [(fst el, filter (\m -> snd m /= 0) (snd el)) | el <- p]
 
 sameLiteral :: Monome -> Monome -> Bool
 sameLiteral m1 m2 = snd m1 == snd m2
@@ -44,7 +48,7 @@ sumAll :: [Monome] -> Monome
 sumAll lst = (sum $ map fst lst, snd $ head lst)
 
 normPoly :: Polynome -> Polynome
-normPoly p = [sumAll m | m <- groupMonomes p]
+normPoly p = cleanZeros [sumAll m | m <- groupMonomes p]
 
 addPoly :: Polynome -> Polynome -> Polynome
 addPoly p1 p2 = normPoly (normPoly p1 ++ normPoly p2)
@@ -54,7 +58,7 @@ deriveMonome dim m = (fst m * fromMaybe 0 (lookup dim (snd m)),
   map (\l -> if fst l == dim then (fst l, snd l - 1) else l) (snd m))
 
 derivePoly :: Char -> Polynome -> Polynome
-derivePoly dim p = cleanZeros $ map (deriveMonome dim) (normPoly p)
+derivePoly dim p = normPoly $ map (deriveMonome dim) (normPoly p)
 
 multPoly :: Polynome -> Polynome -> Polynome
 multPoly p1 p2 = normPoly [multMono a b | a <- normPoly p1, b <- normPoly p2]
@@ -120,26 +124,49 @@ stringToInt :: String -> Int
 stringToInt [] = 0
 stringToInt str = digitToInt (head str) * 10 ^ (length str - 1) + stringToInt (tail str)
 
+polyToStr :: Polynome -> String
+polyToStr p
+    | fst (head p) >= 0 =  drop 3 (foldr ((++) . monoToStr) [] p)
+	| otherwise = "-" ++ drop 3 (foldr ((++) . monoToStr) [] p)
+
+monoToStr :: Monome -> String
+monoToStr m
+    | not (null (snd m)) = numToStr (fst m)  ++ litToStr (snd m)
+	| otherwise = numToStr (fst m)
+
+numToStr :: Int -> String
+numToStr x
+    | x == 1 = " + "
+    | x > 1 = " + " ++ show x
+    | x == 0 = " + " ++ show 0
+	| otherwise = " - " ++ show (abs x)
+
+litToStr :: [Literal] -> String
+litToStr [] = []
+litToStr (x:xs)
+    | snd x == 1 = [fst x] ++ litToStr xs
+    | otherwise = [fst x] ++ ['^'] ++ show (snd x) ++ litToStr xs
+
 ---------------------------------------------- ! OTHERS ----------------------------------------------
 
-normPoly' :: String -> Polynome
-normPoly' p1 = normPoly $ strToPoly p1
+normPoly' :: String -> String
+normPoly' p1 = polyToStr $ normPoly $ strToPoly p1
 
-addPoly' :: String -> String -> Polynome
-addPoly' p1 p2 = addPoly  (strToPoly p1) (strToPoly p2)
+addPoly' :: String -> String -> String
+addPoly' p1 p2 = polyToStr $ addPoly (strToPoly p1) (strToPoly p2)
 
-multPoly' :: String -> String -> Polynome
-multPoly' p1 p2 = multPoly  (strToPoly p1) (strToPoly p2)
+multPoly' :: String -> String -> String
+multPoly' p1 p2 = polyToStr $ multPoly (strToPoly p1) (strToPoly p2)
 
-derivePoly' :: String -> Char -> Polynome
-derivePoly' p1 ch = derivePoly ch (strToPoly p1)
+derivePoly' :: String -> Char -> String
+derivePoly' p1 ch = polyToStr $ derivePoly ch (strToPoly p1)
 
 
 -- NEEDTO:
 {-
-	- Clean Literals where the exponent is 0
+	- Clean Literals where the exponent is 0 X
 	- Create the test file
-	- Convert polynomials to strings
+	- Convert polynomials to strings X
 	- Refactor the code if there is time to do it
 	- Make the README.md and convert to pdf
 -} 
