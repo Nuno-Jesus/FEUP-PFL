@@ -36,13 +36,22 @@ option('2', 'Computer vs Human').
 option('3', 'Human vs Computer').
 option('4', 'Computer vs Computer').
 
-print_menu_aux([]).
-print_menu_aux([X|XS]) :-
+% Receives and prints a list of the menu options
+% print_options(+Options)
+print_options([]).
+print_options([X|XS]) :-
 	write(X),
 	nl,
-	print_menu_aux(XS).
+	print_options(XS).
 
+% Prints the title and the options
 print_menu :-
 	print_title,
 	findall([A]-B, option(A, B), Options),
-	print_menu_aux(Options).
+	print_options(Options).
+
+% read_option(-Option)
+read_option(Option) :-
+	get_char(Option),
+	findall(A, option(A, _), Options),
+	member(Option, Options).
