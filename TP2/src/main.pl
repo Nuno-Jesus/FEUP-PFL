@@ -5,4 +5,5 @@
 % start the game
 play :- 
 	init_game(GameState),
-	cycle(GameState).
+	print_menu.	
+	%cycle(GameState).
