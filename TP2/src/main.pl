@@ -4,5 +4,5 @@
 
 % start the game
 play :- 
-	init_game(gameState(Board, Player1, Player2)),
-	print_board(Board).
+	init_game(GameState),
+	cycle(GameState).
