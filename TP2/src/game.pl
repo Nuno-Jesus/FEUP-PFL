@@ -22,28 +22,10 @@ get_path(Board, X-Y, Path):-
 	PileSize1 is PileSize+1,
 	length(Board, Limit),
 	dfs(X-Y, PileSize1, Limit, Path).
-	
-dfs(Position, PileSize, Limit, Path) :-
-	dfs1(Position, PileSize, Limit, [Position], ThePath),
-	reverse(ThePath,Path).
-
-dfs1(_, 0, _, Path, Path).
-dfs1(S, PileSize, Limit, SoFar, Path) :-
-	PileSize > 0,
-	PileSize1 is PileSize-1,
-	arc(S,S2, Limit),
-	\+(member(S2,SoFar)),
-	dfs1(S2, PileSize1, Limit, [S2|SoFar], Path).
-	
-arc(X-Y, X1-Y1, Limit):-
-	(X1 is X+0, Y1 is Y+1, X1 < Limit, X1 >= 0, Y1 < Limit, Y1 >= 0 );
-	(X1 is X+0, Y1 is Y-1, X1 < Limit, X1 >= 0, Y1 < Limit, Y1 >= 0 );
-	(X1 is X+1, Y1 is Y+0, X1 < Limit, X1 >= 0, Y1 < Limit, Y1 >= 0 );
-	(X1 is X-1, Y1 is Y+0, X1 < Limit, X1 >= 0, Y1 < Limit, Y1 >= 0 ).
 
 % next_turn(+Last, -Next)
-% next_turn(1, 0).
-% next_turn(0, 1).
+next_turn(1, 0).
+next_turn(0, 1).
 
 % valid_moves(+Board, -List)
 valid_moves(Board, List):-
@@ -58,18 +40,18 @@ valid_moves_aux(Board, [H|T], List):-
 	append(List1, List2, List).
 
 % evaluate_move(Board, +Move)
-% evaluate_move(Move):-	
-%	valid_moves(Board, List),
-%	member(Move, List).
+evaluate_move(Move):-	
+	valid_moves(Board, List),
+	member(Move, List).
 	
 % move(+GameState, +Move, -NewGameState)
-%move(GameState, Move, NewGameState):-
+move(GameState, Move, NewGameState):-
 	
 % push_piece(+Cell, +Piece, -NewCell)
-%push_piece(Cell, Piece, NewCell):-
+push_piece(Cell, Piece, NewCell):-
 
 % walk(+Board, +Path, +Stack, -NewBoard)
-%walk(+Board, +Path, +Stack, -NewBoard)
+walk(+Board, +Path, +Stack, -NewBoard)
 
 %cycle(gameState(Board, Player1, Player2, Turn)):-
 	% check winning condition
@@ -77,14 +59,10 @@ valid_moves_aux(Board, [H|T], List):-
 cycle(gameState(Board, Player1, Player2, Turn)) :-
 	display_game(gameState(Board, Player1, Player2, Turn)),
 	valid_moves(Board, List),
-	get_piles(Board, Piles),
-	write(Piles),
-	nl,
-	write(List).
-%	read_move(Move),
-%	evaluate_move(Board, Move),
-%	move(gameState(Board, Player1, Player2, Turn), Move, NewGameState),
-%	cycle(NewGameState).
+	read_move(Move),
+	evaluate_move(Board, Move),
+	move(gameState(Board, Player1, Player2, Turn), Move, NewGameState),
+	cycle(NewGameState).
 
 
 	

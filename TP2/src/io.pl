@@ -1,4 +1,5 @@
 :-use_module(library(lists)).
+:-consult('tools.pl').
 
 % print board
 % display_board(+Board)
@@ -55,3 +56,50 @@ read_option(Option) :-
 	get_char(Option),
 	findall(A, option(A, _), Options),
 	member(Option, Options).
+	
+% read_move(-Move)
+read_move(Move):-
+	repeat,
+	read_keyboard(Input),
+	validate_input(Input, Move),
+	!.
+
+% read_keyboard(-Input)
+read_keyboard(Input):-
+	write('Please write a valid command: X0-Y0 X1-Y1 X2-Y2 ...'),
+	nl,
+	get_code(Code),
+	read_keyboard_aux(Code, Input),
+	!.
+
+% read_keyboard_aux(+Ch, -Input)
+read_keyboard_aux(13, []).
+read_keyboard_aux(10, []).
+read_keyboard_aux(Code, [Ch|Rest]):-
+	get_code(Code1),
+	char_code(Ch, Code),
+	read_keyboard_aux(Code1, Rest).
+	
+% validate_input(+Input, -Moves)
+validate_input(Input, Moves):-
+	delete(Input, ' ', Input1),
+	length(Input1, Len),
+	!,
+	Len > 2, !, divides(Len, 3),
+	validate_input_aux(Input1, Moves).
+
+% validate_input_aux(+Input, -Position, -Success)
+validate_input_aux([], []).
+validate_input_aux([X|[M|[Y|T]]], Moves):-
+	verify_number(X, NX), !, verify_number(Y, NY),
+	!,
+	verify_parser(M),
+	!,
+	validate_input_aux(T, Rest),
+	append([NX-NY], Rest, Moves).
+
+	
+	
+	
+	
+	
