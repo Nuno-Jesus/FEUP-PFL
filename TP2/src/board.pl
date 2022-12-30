@@ -3,8 +3,8 @@
 
 % init_row(+Row, -NewRow)
 init_row(Row, NewRow) :-
-	replace(Row, 0, ['G', 'G'], Row1),
-    replace(Row1, 3, ['G', 'G'], NewRow).
+	replace_list(Row, 0, ['G', 'G'], Row1),
+    replace_list(Row1, 3, ['G', 'G'], NewRow).
 
 % initialize board pieces
 % init_pieces(+Board, -NewBoard)
