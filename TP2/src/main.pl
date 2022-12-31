@@ -5,6 +5,5 @@
 % start the game
 play :- 
 	init_game(GameState),
-	print_menu,
-	read_option(Option),
-	cycle(GameState).
+	display_game(GameState),
+	game_loop(GameState).

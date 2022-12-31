@@ -6,7 +6,13 @@ replace_list([H|T], I, X, [H|R]):-
     I1 is I-1, 
     replace_list(T, I1, X, R).
 
-% replace_matrix(+Old, +IndX, +IndY, +Ele, -New)	
+% last_element(+List, -Last)	
+last_element(List, Last):- append(_, [Last], List).
+
+% pop_last_element(+List, -Res)
+pop_last_element(List, Res):- append(Res, [_], List). 
+
+% replace_matrix_aux(+Old, +IndX, +IndY, +Ele, -New)	
 replace_matrix([List|T], IndX, 0, Ele, [NewList|T]):-
 	replace_list(List, IndX, Ele, NewList).
 replace_matrix([List|T], IndX, IndY, Ele, [List|R]):-
@@ -16,8 +22,8 @@ replace_matrix([List|T], IndX, IndY, Ele, [List|R]):-
 	
 % at(+Matrix, +IndX, +IndY, -Val)
 at(Matrix, IndX, IndY, Val) :-
-	nth0(IndX, Matrix, IndX1), 
-	nth0(IndY, IndX1, Val).
+	nth0(IndY, Matrix, Y1), 
+	nth0(IndX, Y1, Val).
 	
 dfs(Position, Distance, Limit, Path) :-
 	dfs1(Position, Distance, Limit, [Position], ThePath),
@@ -49,3 +55,8 @@ verify_parser('-').
 % divides(+N)
 divides(N,D) :-
     0 is N mod D.
+
+% converter(+Len, +FakeInd, -RealInd)
+converter(Len, FakeInd, RealInd):-
+	Ind is Len-1, 
+	RealInd is (FakeInd - Ind)*(-1).
