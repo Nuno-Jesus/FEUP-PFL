@@ -60,3 +60,20 @@ divides(N,D) :-
 converter(Len, FakeInd, RealInd):-
 	Ind is Len-1, 
 	RealInd is (FakeInd - Ind)*(-1).
+
+% is_empty(+List)
+is_empty([]).
+
+% is_same(+X, +Y)
+is_same(X,X).
+
+% transp(+List, -Result)
+transp([[]|_], []).
+transp(Matrix, [Row|Rows]) :- 
+	transpose_first_col(Matrix, Row, RestMatrix),
+	transp(RestMatrix, Rows).
+
+% transpose_first_col(+Matrix, -Row, -RestMatrix)
+transpose_first_col([], [], []).
+transpose_first_col([[H|T]|Rows], [H|Hs], [T|Ts]) :- transpose_first_col(Rows, Hs, Ts).
+	
