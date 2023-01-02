@@ -20,11 +20,22 @@ display_cell_aux([H|T]):-
 	
 
 % print board
-% display_board(+Board)
-display_board(Board):-
+% display_board(+Type, +Board)
+display_board('h', Board):-
 	max_cell_size(Board, CellSize),
 	display_board_aux(Board, CellSize).
+
+display_board('cr', Board):-
+	max_cell_size(Board, CellSize),
+	display_board_aux(Board, CellSize),
+	write('Press any key to continue\n'),
+	get_char(_).
 	
+display_board('cg', Board):-
+	max_cell_size(Board, CellSize),
+	display_board_aux(Board, CellSize),
+	write('Press any key to continue\n'),
+	get_char(_).
 	
 % display_board_aux(+Board, +CellSize)
 display_board_aux([], _).
@@ -39,10 +50,15 @@ print_row([H|T], CellSize):-
     display_cell(H, CellSize),
 	print_row(T, CellSize).
 
-display_game(gameState(Board, _, _, _)):-
+display_game(gameState(Board, player(Turn, Type , _, _), _, Turn)):-
 	length(Board, Size),
 	display_move_direction(Size),
-	display_board(Board).
+	display_board(Type, Board).
+	
+display_game(gameState(Board, _, player(Turn, Type, _, _), Turn)):-
+	length(Board, Size),
+	display_move_direction(Size),
+	display_board(Type, Board).
 	
 % display_move_direction(+Size)
 display_move_direction(Size):-
@@ -64,33 +80,36 @@ print_title :-
 	write('\t    (__ __   (__         (__(__        (__(__         (__(________(________\n'),
 	write('\t       (_                                                                  \n').
 
-% Prints the initial menu
-% print_menu/0
-
 option('1', 'Human vs Human').
-option('2', 'Computer vs Human').
-option('3', 'Human vs Computer').
-option('4', 'Computer vs Computer').
+option('2', 'Computer Random vs Human').
+option('3', 'Human vs Computer Random').
+option('4', 'Computer Greedy vs Human').
+option('5', 'Human vs Computer Greedy').
+option('6', 'Computer Random vs Computer Greedy').
+option('7', 'Computer Greedy vs Computer Random').
+option('8', 'Computer Random vs Computer Random').
+option('9', 'Computer Greedy vs Computer Greedy').
+
+% Prints the options
+print_options :-
+	findall([A]-B, option(A, B), Options),
+	print_options_aux(Options).
 
 % Receives and prints a list of the menu options
 % print_options(+Options)
-print_options([]).
-print_options([X|XS]) :-
+print_options_aux([]).
+print_options_aux([X|XS]) :-
 	write(X),
 	nl,
-	print_options(XS).
-
-% Prints the title and the options
-print_menu :-
-	print_title,
-	findall([A]-B, option(A, B), Options),
-	print_options(Options).
+	print_options_aux(XS).
 
 % read_option(-Option)
-read_option(Option) :-
-	get_char(Option),
+read_option(H) :-
+	write('Please write a valid option\n'),
+	read_keyboard([H|_]),
 	findall(A, option(A, _), Options),
-	member(Option, Options).
+	member(H, Options),
+	!.
 	
 % read_move(-Move)
 read_move(Move):-
@@ -101,7 +120,7 @@ read_move(Move):-
 
 % read_keyboard(-Input)
 read_keyboard(Input):-
-	write('Please write a valid command: X0-Y0 X1-Y1 X2-Y2 ...'),
+	% write('Please write a valid command: X0-Y0 X1-Y1 X2-Y2 ...'),
 	nl,
 	get_code(Code),
 	read_keyboard_aux(Code, Input),

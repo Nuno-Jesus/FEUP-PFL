@@ -1,6 +1,10 @@
 :- use_module(library(lists)).
 :- consult('tools.pl').
 
+% opposite_piece(+Piece, -EnemyPiece)
+opposite_piece('B', 'R').
+opposite_piece('R', 'B').
+
 % max_cell_size(+Board, -MaxCellSize)
 max_cell_size(Board, MaxCellSize):-
 	findall(MaxCellSizeRow, (member(Row, Board), max_cell_size_row(Row, MaxCellSizeRow)), Result),
@@ -32,3 +36,40 @@ init_board(NewBoard) :-
     length(Board, 4),
     maplist(=(Row), Board),
     init_pieces(Board, NewBoard).
+	
+% count_top_pieces(+Board, +Piece, -Result)
+count_top_pieces(Board, Piece, Result):-
+	findall(Count, (member(Row, Board), count_top_pieces_aux(Row, Piece, Count)), RowCount),
+	sumlist(RowCount, Result).
+
+% count_top_pieces_aux(+Row, +Piece, -Count)
+count_top_pieces_aux(Row, Piece, Count):-
+	findall(1, (member([H|_], Row), is_same(Piece, H)), Result),
+	sumlist(Result, Count).
+	
+% verify_columns(+Board, +Piece)
+verify_columns(Board, Piece):- 
+	transp(Board, BoardAux),
+	verify_rows(BoardAux, Piece).
+
+% verify_rows(+Board, +Piece)
+verify_rows(Board, Piece):-
+	member(Line, Board),
+	verify_line(Line, Piece).
+	
+% verify_line(+Line, +Piece)
+verify_line(Line, Piece):- 
+	no_empty_cells(Line),
+	verify_line_aux(Line, Piece).
+	
+% verify_line_aux(+Line, +Piece)
+verify_line_aux([], _).
+verify_line_aux([[Top|_]|T], Piece):-
+	is_same(Piece, Top),
+	verify_line_aux(T, Piece).
+	
+% no_empty_cells(+Line)
+no_empty_cells([]).
+no_empty_cells([H|T]):-
+	\+is_empty(H),
+	no_empty_cells(T).

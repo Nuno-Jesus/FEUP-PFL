@@ -1,11 +1,12 @@
 :-use_module(library(lists)).
+:-use_module(library(random)).
 
 :-consult('board.pl').
 :-consult('tools.pl').
 
 % initialize game
-% init_game(-GameState)
-init_game(gameState(NewBoard, player(0, 'R', 8), player(1, 'B', 8), 0)) :-
+% init_game(+Type1, +Type2, -GameState)
+init_game(Type1, Type2, gameState(NewBoard, player(0, Type1, 'R', 8), player(1, Type2, 'B', 8), 0)) :-
 	init_board(NewBoard).
 	
 % get_piles(+Board, -Piles)
@@ -36,25 +37,23 @@ valid_moves_aux(Board, [H|T], List):-
 	valid_moves_aux(Board, T, List2),
 	append(List1, List2, List).
 
-% evaluate_move(+GameState, +Move)
-evaluate_move(gameState(Board, _, _, _), Move):-	
+% evaluate_move(+Board, +Move)
+evaluate_move(Board, Move):-	
 	valid_moves(Board, List),
 	member(Move, List).
 	
 % move(+GameState, +Move, -NewGameState)
-move(gameState(Board, player(Turn, Piece, NP), Player2, Turn), Move, gameState(NewBoard, player(Turn, Piece, NP1), Player2, NextTurn)):-
+move(gameState(Board, player(Turn, Type, Piece, NP), Player2, Turn), Move, gameState(NewBoard, player(Turn, Type, Piece, NP1), Player2, NextTurn)):-
 	move_aux(Board, Piece, Move, NewBoard),
 	NP1 is NP-1,
-	next_turn(Turn, NextTurn),
-	write('Next player 2\n').
+	next_turn(Turn, NextTurn).
 	
 
 % move(+GameState, +Move, -NewGameState)
-move(gameState(Board, Player1, player(Turn, Piece, NP), Turn), Move, gameState(NewBoard, Player1, player(Turn, Piece, NP1), NextTurn)):-
+move(gameState(Board, Player1, player(Turn, Type, Piece, NP), Turn), Move, gameState(NewBoard, Player1, player(Turn, Type, Piece, NP1), NextTurn)):-
 	move_aux(Board, Piece, Move, NewBoard),
 	NP1 is NP-1,
-	next_turn(Turn, NextTurn),
-	write('Next player 1\n').
+	next_turn(Turn, NextTurn).
 
 % move_aux(+Board, +Piece, +Move, -NewBoard)
 move_aux(Board, Piece, [X-Y|T], NewBoard):-
@@ -75,63 +74,74 @@ walk(Board, [X-Y|T], Stack, NewBoard):-
 	replace_matrix(Board, X, Y, [Piece|Pile], NewBoardAux),
 	walk(NewBoardAux, T, NewStack, NewBoard).
 	
-% choose_move(+GameState, -Move)
-choose_move(GameState, Move):-
+% choose_move(+Board, +Player, -Move)
+choose_move(Board, player(_, 'h', _, _), Move):-
 	repeat,
 	read_move(Move),
-	evaluate_move(GameState, Move),
+	evaluate_move(Board, Move),
 	!.
+	
+choose_move(Board, player(_, 'cr', _, _), Move):-
+	valid_moves(Board, List),
+	random_member(Move, List).
+	
+choose_move(Board, player(_, 'cg', Piece, _), BestMove):-
+	valid_moves(Board, Moves),
+	setof(Score-Move, (member(Move, Moves), move_score(Board, Move, Piece, Score)), Set),
+	best_move(Set, BestMove).
 
+% best_move(+Set, -BestMove)
+best_move(Set, BestMove):-
+	last(Set, Score-_),
+	findall(MoveAux, (member(ScoreAux-MoveAux, Set), is_same(ScoreAux, Score)), Result),
+	random_member(BestMove, Result).
+	
+% move_score(+Board, +Move, +Piece, -Score)
+move_score(Board, Move, Piece, Score):-
+	move_aux(Board, Piece, Move, NewBoard),
+	board_score(NewBoard, Piece, Score).
+	
+% board_score(+NewBoard, +Piece, -Score)
+board_score(NewBoard, Piece, 0):-
+	opposite_piece(Piece, EnemyPiece),
+	verify_end(NewBoard, EnemyPiece).
+	
+board_score(NewBoard, Piece, 100000):-
+	verify_end(NewBoard, Piece).
+
+board_score(NewBoard, Piece, Score):-
+	count_top_pieces(NewBoard, Piece, Score).
+	
+	
 % verify_end(+Board, +Piece)
 verify_end(Board, Piece):- verify_columns(Board, Piece).
 verify_end(Board, Piece):- verify_rows(Board, Piece).
 
-% verify_columns(+Board, +Piece)
-verify_columns(Board, Piece):- 
-	transp(Board, BoardAux),
-	verify_rows(BoardAux, Piece).
-
-% verify_rows(+Board, +Piece)
-verify_rows(Board, Piece):-
-	member(Line, Board),
-	verify_line(Line, Piece).
-	
-% verify_line(+Line, +Piece)
-verify_line(Line, Piece):- 
-	no_empty_cells(Line),
-	verify_line_aux(Line, Piece).
-	
-% verify_line_aux(+Line, +Piece)
-verify_line_aux([], _).
-verify_line_aux([[Top|_]|T], Piece):-
-	is_same(Piece, Top),
-	verify_line_aux(T, Piece).
-	
-% no_empty_cells(+Line)
-no_empty_cells([]).
-no_empty_cells([H|T]):-
-	\+is_empty(H),
-	no_empty_cells(T).
-
-game_loop(gameState(Board, player(_, P1, _), player(_, P2, _), _)):-
+game_loop(gameState(Board, player(_, _, P1, _), player(_, _, P2, _), _)):-
 	verify_end(Board, P1),
 	verify_end(Board, P2),
 	write('Draw\n').
 
-game_loop(gameState(Board, player(ID1, P1, _), _, _)):-
+game_loop(gameState(Board, player(ID1, _, P1, _), _, _)):-
 	verify_end(Board, P1),
-	write(ID1), nl.
+	format('Player ~w wins!!~n', [ID1]).
 
-game_loop(gameState(Board, _, player(ID2, P2, _), _)):-
+game_loop(gameState(Board, _, player(ID2, _, P2, _), _)):-
 	verify_end(Board, P2),
-	write(ID2), nl.
+	format('Player ~w wins!!~n', [ID2]).
 
-game_loop(gameState(_, player(_, _, 0), player(_, _, 0), _)):-
+game_loop(gameState(_, player(_, _, _, 0), player(_, _, _, 0), _)):-
 	write('Draw\n').
 	
-game_loop(GameState) :-
-	choose_move(GameState, Move),
-	move(GameState, Move, NewGameState),
+game_loop(gameState(Board, player(Turn, Type, Piece, NP), Player2, Turn)) :-
+	choose_move(Board, player(Turn, Type, Piece, NP), Move),
+	move(gameState(Board, player(Turn, Type, Piece, NP), Player2, Turn), Move, NewGameState),
+	display_game(NewGameState),
+	game_loop(NewGameState).
+	
+game_loop(gameState(Board, Player1, player(Turn, Type, Piece, NP), Turn)) :-
+	choose_move(Board, player(Turn, Type, Piece, NP), Move),
+	move(gameState(Board, Player1, player(Turn, Type, Piece, NP), Turn), Move, NewGameState),
 	display_game(NewGameState),
 	game_loop(NewGameState).
 
