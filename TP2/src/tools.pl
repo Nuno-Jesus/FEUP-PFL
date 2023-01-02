@@ -76,4 +76,3 @@ transp(Matrix, [Row|Rows]) :-
 % transpose_first_col(+Matrix, -Row, -RestMatrix)
 transpose_first_col([], [], []).
 transpose_first_col([[H|T]|Rows], [H|Hs], [T|Ts]) :- transpose_first_col(Rows, Hs, Ts).
-	

@@ -1,6 +1,16 @@
 :- use_module(library(lists)).
 :- consult('tools.pl').
 
+% max_cell_size(+Board, -MaxCellSize)
+max_cell_size(Board, MaxCellSize):-
+	findall(MaxCellSizeRow, (member(Row, Board), max_cell_size_row(Row, MaxCellSizeRow)), Result),
+	max_member(MaxCellSize, Result).
+	
+% max_cell_size_row(+Row, -MaxCellSize)
+max_cell_size_row(Row, MaxCellSize):-
+	findall(Size, (member(Cell, Row), length(Cell, Size)), Result),
+	max_member(MaxCellSize, Result).
+
 % init_row(+Row, -NewRow)
 init_row(Row, NewRow) :-
 	replace_list(Row, 0, ['G', 'G'], Row1),

@@ -1,21 +1,56 @@
 :-use_module(library(lists)).
 :-consult('tools.pl').
 
+% display_cell(+Cell, +CellSize)
+display_cell(Cell, CellSize):-
+	length(Cell, Size),
+	BlankSpace is CellSize-Size,
+	length(CellRest, BlankSpace),
+	maplist(=('.'), CellRest),
+	reverse(Cell, CellAux),
+	append(CellAux, CellRest, CellResult),
+	write('['),
+	display_cell_aux(CellResult).
+	
+% display_cell_aux(+Cell, +BlankSpace)
+display_cell_aux([]):- write(']').
+display_cell_aux([H|T]):-
+	write(H),
+	display_cell_aux(T).
+	
+
 % print board
 % display_board(+Board)
-display_board([]).
-display_board([X|XS]):-
-	print_row(X),
-	display_board(XS).
+display_board(Board):-
+	max_cell_size(Board, CellSize),
+	display_board_aux(Board, CellSize).
+	
+	
+% display_board_aux(+Board, +CellSize)
+display_board_aux([], _).
+display_board_aux([H|T], CellSize):-
+	print_row(H, CellSize),
+	display_board_aux(T, CellSize).
 
 % print row
-% print_row(+Row)
-print_row(Row):-
-    write(Row),
-    nl.
+% print_row(+Row, CellSize)
+print_row([],_) :- nl. 
+print_row([H|T], CellSize):-
+    display_cell(H, CellSize),
+	print_row(T, CellSize).
 
 display_game(gameState(Board, _, _, _)):-
+	length(Board, Size),
+	display_move_direction(Size),
 	display_board(Board).
+	
+% display_move_direction(+Size)
+display_move_direction(Size):-
+	format('Board Size : ~w~n', [Size]),
+	MaxIndex is Size-1,
+	format('X: left->right (0->~w) | ', [MaxIndex]),
+	format('Y: up->down (0->~w)~n', [MaxIndex]).
+	
 
 % Prints the menu title
 % print_title/0
