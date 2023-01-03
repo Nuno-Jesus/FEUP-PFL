@@ -1,6 +1,8 @@
 :- consult('io.pl').
 :- consult('game.pl').
 
+% menu cycle. Prints title, options and prompts user for input.
+% menu/0
 menu:-
 	print_title,
 	repeat,
@@ -9,7 +11,9 @@ menu:-
 	write('The game will start\n'),
 	start_game(Option),
 	!.
-	
+
+% initializes game mode corresponding to option
+% start_game(+Option)
 start_game('1'):- 
 	init_game('h', 'h', GameState),
 	display_game(GameState),

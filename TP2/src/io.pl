@@ -1,6 +1,7 @@
 :-use_module(library(lists)).
 :-consult('tools.pl').
 
+% displays single cell
 % display_cell(+Cell, +CellSize)
 display_cell(Cell, CellSize):-
 	length(Cell, Size),
@@ -50,6 +51,8 @@ print_row([H|T], CellSize):-
     display_cell(H, CellSize),
 	print_row(T, CellSize).
 
+% displays gamestate
+% display_game(+GameState)
 display_game(gameState(Board, player(Turn, Type , _, _), _, Turn)):-
 	length(Board, Size),
 	display_move_direction(Size),
@@ -59,7 +62,8 @@ display_game(gameState(Board, _, player(Turn, Type, _, _), Turn)):-
 	length(Board, Size),
 	display_move_direction(Size),
 	display_board(Type, Board).
-	
+
+% displays information related to the Board
 % display_move_direction(+Size)
 display_move_direction(Size):-
 	format('Board Size : ~w~n', [Size]),
@@ -103,6 +107,7 @@ print_options_aux([X|XS]) :-
 	nl,
 	print_options_aux(XS).
 
+% read user option from the menu
 % read_option(-Option)
 read_option(H) :-
 	write('Please write a valid option\n'),
@@ -110,7 +115,8 @@ read_option(H) :-
 	findall(A, option(A, _), Options),
 	member(H, Options),
 	!.
-	
+
+% read and validate user move	
 % read_move(-Move)
 read_move(Move):-
 	repeat,
@@ -118,6 +124,7 @@ read_move(Move):-
 	validate_input(Input, Move),
 	!.
 
+% read from keyboard
 % read_keyboard(-Input)
 read_keyboard(Input):-
 	% write('Please write a valid command: X0-Y0 X1-Y1 X2-Y2 ...'),
@@ -133,7 +140,8 @@ read_keyboard_aux(Code, [Ch|Rest]):-
 	get_code(Code1),
 	char_code(Ch, Code),
 	read_keyboard_aux(Code1, Rest).
-	
+
+% validate user input
 % validate_input(+Input, -Moves)
 validate_input(Input, Moves):-
 	delete(Input, ' ', Input1),

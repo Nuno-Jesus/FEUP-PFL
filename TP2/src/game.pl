@@ -8,12 +8,14 @@
 % init_game(+Type1, +Type2, -GameState)
 init_game(Type1, Type2, gameState(NewBoard, player(0, Type1, 'R', 8), player(1, Type2, 'B', 8), 0)) :-
 	init_board(NewBoard).
-	
+
+% get non_empty cells
 % get_piles(+Board, -Piles)
 get_piles(Board, Piles) :-
 	findall(X-Y, (at(Board, X, Y, [_|_])) ,Piles).
 	
-% get_paths(+Board, +Position, -Path)
+% get total paths from positon
+% get_path(+Board, +Position, -Path)
 get_path(Board, X-Y, Path):-
 	at(Board, X, Y, Elem),
 	length(Elem, PileSize),
@@ -25,6 +27,7 @@ get_path(Board, X-Y, Path):-
 next_turn(1, 0).
 next_turn(0, 1).
 
+% return list with valid moves
 % valid_moves(+Board, -List)
 valid_moves(Board, List):-
 	get_piles(Board, Piles),
@@ -37,18 +40,19 @@ valid_moves_aux(Board, [H|T], List):-
 	valid_moves_aux(Board, T, List2),
 	append(List1, List2, List).
 
+% check if move belongs to valid moves
 % evaluate_move(+Board, +Move)
 evaluate_move(Board, Move):-	
 	valid_moves(Board, List),
 	member(Move, List).
-	
+
+% commit move and update gameState
 % move(+GameState, +Move, -NewGameState)
 move(gameState(Board, player(Turn, Type, Piece, NP), Player2, Turn), Move, gameState(NewBoard, player(Turn, Type, Piece, NP1), Player2, NextTurn)):-
 	move_aux(Board, Piece, Move, NewBoard),
 	NP1 is NP-1,
 	next_turn(Turn, NextTurn).
 	
-
 % move(+GameState, +Move, -NewGameState)
 move(gameState(Board, Player1, player(Turn, Type, Piece, NP), Turn), Move, gameState(NewBoard, Player1, player(Turn, Type, Piece, NP1), NextTurn)):-
 	move_aux(Board, Piece, Move, NewBoard),
@@ -60,11 +64,13 @@ move_aux(Board, Piece, [X-Y|T], NewBoard):-
 	push_piece(Board, X-Y, Piece, Stack, NewBoardAux),
 	walk(NewBoardAux, T, Stack, NewBoard).
 
+% push_piece in the stack located in the Position
 % push_piece(+Board, +Position, +Piece, -Stack, -NewBoard)
 push_piece(Board, X-Y, Piece, [Piece|Stack], NewBoard):-
 	at(Board, X, Y, Stack),
 	replace_matrix(Board, X, Y, [], NewBoard).
-	
+
+% move stack along path
 % walk(+Board, +Path, +Stack, -NewBoard)
 walk(Board, [], [], Board).
 walk(Board, [X-Y|T], Stack, NewBoard):-
@@ -73,7 +79,8 @@ walk(Board, [X-Y|T], Stack, NewBoard):-
 	at(Board, X, Y, Pile),
 	replace_matrix(Board, X, Y, [Piece|Pile], NewBoardAux),
 	walk(NewBoardAux, T, NewStack, NewBoard).
-	
+
+% ask for player move
 % choose_move(+Board, +Player, -Move)
 choose_move(Board, player(_, 'h', _, _), Move):-
 	repeat,
@@ -90,17 +97,20 @@ choose_move(Board, player(_, 'cg', Piece, _), BestMove):-
 	setof(Score-Move, (member(Move, Moves), move_score(Board, Move, Piece, Score)), Set),
 	best_move(Set, BestMove).
 
+% retrieve best move
 % best_move(+Set, -BestMove)
 best_move(Set, BestMove):-
 	last(Set, Score-_),
 	findall(MoveAux, (member(ScoreAux-MoveAux, Set), is_same(ScoreAux, Score)), Result),
 	random_member(BestMove, Result).
-	
+
+% retrieve move score
 % move_score(+Board, +Move, +Piece, -Score)
 move_score(Board, Move, Piece, Score):-
 	move_aux(Board, Piece, Move, NewBoard),
 	board_score(NewBoard, Piece, Score).
-	
+
+% retrieve board score
 % board_score(+NewBoard, +Piece, -Score)
 board_score(NewBoard, Piece, 0):-
 	opposite_piece(Piece, EnemyPiece),
@@ -112,11 +122,13 @@ board_score(NewBoard, Piece, 100000):-
 board_score(NewBoard, Piece, Score):-
 	count_top_pieces(NewBoard, Piece, Score).
 	
-	
+% verify gameover
 % verify_end(+Board, +Piece)
 verify_end(Board, Piece):- verify_columns(Board, Piece).
 verify_end(Board, Piece):- verify_rows(Board, Piece).
 
+% main gameloop 
+% game_loop(+GameState)
 game_loop(gameState(Board, player(_, _, P1, _), player(_, _, P2, _), _)):-
 	verify_end(Board, P1),
 	verify_end(Board, P2),
