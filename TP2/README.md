@@ -47,21 +47,155 @@ The `src` folder contains different files, each of them used for different purpo
 |`menu.pl` |Reponsible for handling the user input and mapping to the correct menu option| 
 |`tools.pl`|Utility predicates| 
 
+------------------
+
 ### **Internal State Representation**
 To keep track of the game's internal state, we make use of a `gameState` data structure that holds this structure:
 
-- Board
-- Player 1
-- Player 2
-- Player turn
+|Field|Description|
+|:--:|:--|
+|Board      |<!-- DESCRIPTION -->|
+|Player 1   |<!-- DESCRIPTION -->|
+|Player 2   |<!-- DESCRIPTION -->|
+|Player turn|<!-- DESCRIPTION -->|
+
+The `gameState` data structure is initialized like this:
+```Prolog
+	<!-- ... -->
+```
+
+These are examples of the game state through the game
+- Initial State
+<!-- ... -->
+
+- Mid State
+<!-- ... -->
+
+- End State
+<!-- ... -->
+
+The state initialization is achieved using this code:
+
+```Prolog
+	initial_state(+Size, -GameState)
+	
+	...
+```
+
+Also, we assigned RGB colors to distinguish the different stones: (R)ed for player 1, (B)lue for player 2 and (G)reen for neutral color stones.
+
+------------------
 
 ### **Game State Visualization**
+
+The game has a rectangular board that is printed before every player move. The board is represented using a 4x4 grid. This is an example of a possible board.
+
+```Prolog
+	 0       1       2       3
+0 [GG...] [.....] [.....] [GG...]  
+1 [.....] [.....] [.....] [.....]
+2 [.....] [.....] [.....] [.....]
+3 [GG...] [.....] [.....] [GG...]
+```
+
+We are using the following cell notation:
+
+<!-- NOTATION FOR EACH SYMBOL -->
+
+We also print out the player turn and the pieces each player has left(*ESTA A FALTAR ESTA PARTE*)
+
+<!-- TALVEZ IMAGENS SERIA BOM -->
+
+This is the code that handles the board displaying:
+```Prolog
+	display_game(+GameState)
+	
+	...
+```
+
+------------------
+
 ### **Game Plays Execution**
+
+The game plays are acquired through user input (in the case where at least a Human is playing) and are generated for the Computer, according to its play style.
+
+The required input is obtained in two parts:
+
+1. We specify the coordinates of the cell to place a stone on using this notation:
+
+```txt
+	X-Y
+```
+2.We get the path to distribute the stack using the following regular expression...
+
+```txt
+	<!-- COLOCA UMA REGEX AQUI PARA IDENTIFICAR A STRING DE INPUT-->
+```
+...where each field contains the coordinates of the cell of the path to follow. 
+The input must respect the following constraints:
+ - Constraint 1
+ - Constraint 2
+ - Constraint 3
+ ...
+
+Each play is validated by applying the following logic:
+<!-- ... -->
+
+The move predicate was implemented as follows:
+
+```Prolog
+	move(+GameState, +Move, -NewGameState).
+
+	...
+```
+
+------------------
+
 ### **Valid Plays**
+
+After/before (?) the play move is consumed, a list of possible moves is generated, allowing us to cross the user input/computer generated move with legal moves.
+
+```Prolog
+	valid_moves(+GameState, +Player, -ListOfMoves)
+
+	...
+```
+------------------
+
 ### **Endgame**
+
+As told before, the game ends whenever one of the players manages to get a 4-stone row, column or diagonal of theirs stones in the top view of the board.
+
+In order to verify that, we sweep the table (?) to find any combination of 4 stacks in a row that have the same head. 
+
+If the players run out of stones before reaching the winning state, the game ends in a draw. Both draw and winning states are clearly displayed on the screen.
+
+```Prolog
+ game_over(+GameState, -Winner)
+```
+------------------
+
 ### **Board Evaluation**
+(?)
+
+```Prolog
+value(+GameState, +Player, -Value)
+```
+------------------
+
 ### **Computer Plays**
 
+Depending on the level of the computer, we use different strategies to genereate automated plays.
+
+- Level 1
+	<!-- DESCRICAO DO CODIGO QUE GERA AS JOGADAS ALEATORIAS COM APRESENTACAO DO PREDICADO -->
+- Level 2
+	<!-- DESCRICAO DO CODIGO QUE GERA AS JOGADAS GREEDY COM APRESENTACAO DO PREDICADO -->
+
+```
+Prolog
+choose_move(+GameState, +Player, +Level, -Move)
+```
 ------------------
 
 ## **Conclusions**
